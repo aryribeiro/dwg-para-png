@@ -320,6 +320,13 @@ def read_dxf_with_repair(dxf_path: Path):
 
 def dxf_to_png(dxf_path: Path):
     """Devolve (png_bytes, info). info = versão do DXF, entidades, camadas."""
+    # As fontes têm de ser registradas ANTES de abrir o desenho. Ler o DXF já
+    # mede texto (o cálculo dos limites do desenho passa pelos MTEXT), e essa
+    # primeira medição fixa a fonte. Se a Arial ainda não estiver registrada,
+    # o desenho inteiro é medido com a fonte do sistema, mais larga: cada
+    # parágrafo quebra numa linha a mais e as linhas se atropelam. Só aparece
+    # em servidor que TEM fontes de sistema — por isso passava na bancada.
+    prepare_font_environment()
     try:
         doc, repairs = read_dxf_with_repair(dxf_path)
     except Exception:
@@ -334,7 +341,6 @@ def dxf_to_png(dxf_path: Path):
         raise ConversionError("desenho vazio")
 
     page, dpi = page_for_extents(extents.size.x, extents.size.y)
-    prepare_font_environment()
     ctx = RenderContext(doc)
     backend = PyMuPdfBackend()
     cfg = config.Configuration(

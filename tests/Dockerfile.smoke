@@ -1,8 +1,14 @@
-# Smoke test no mesmo tipo de ambiente do Streamlit Cloud (Debian slim, sem
-# fontes nem pacotes de sistema): prova que bin/dwg2dxf roda e que a suíte
-# passa em Linux. Uso: docker build -f tests/Dockerfile.smoke -t dwg-smoke . && docker run --rm dwg-smoke
-FROM python:3.12-slim-bookworm
+# Espelho do Streamlit Cloud: Debian trixie, Python 3.13 e os pacotes do
+# packages.txt instalados por apt. As FONTES DE SISTEMA importam: sem elas o
+# ambiente não reproduz o servidor e um defeito de ordem de registro de fonte
+# passa despercebido (foi o que aconteceu na v1.1.0).
+# Uso: docker build -f tests/Dockerfile.smoke -t dwg-smoke . && docker run --rm dwg-smoke
+FROM python:3.13-slim-trixie
 WORKDIR /app
+COPY packages.txt .
+RUN apt-get update \
+ && xargs -a packages.txt apt-get install -y --no-install-recommends \
+ && rm -rf /var/lib/apt/lists/*
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt pytest
 COPY . .
