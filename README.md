@@ -66,8 +66,11 @@ Fontes públicas usadas na validação manual: os 141 DWG da suíte da [LibreDWG
 
 1. Faça push para o GitHub
 2. Em [share.streamlit.io](https://share.streamlit.io), conecte o repositório
-3. Nenhum pacote de sistema é necessário: o `bin/dwg2dxf` é estático e os demais motores vêm do `requirements.txt`
-4. Deploy
+3. Em **Advanced settings**, escolha **Python 3.13** (ou 3.12). Com Python 3.14 a instalação falha: o Streamlit 1.39 exige pillow abaixo da versão 11, que não tem pacote pronto para 3.14 e não compila na imagem do Cloud. A versão do Python não pode ser trocada depois; é preciso apagar o app e implantar de novo.
+4. Nenhum pacote de sistema é necessário: o `bin/dwg2dxf` é estático e os demais motores vêm do `requirements.txt`
+5. Deploy
+
+App no ar: https://dwg-para-png.streamlit.app/
 
 ## 🔁 Reconstruir o binário do LibreDWG
 
