@@ -27,7 +27,7 @@ Resiliência incorporada (medida numa varredura de 164 DWG reais, de R13 a 2018)
 
 - **DXF desalinhado**: em DWG com bits corrompidos o LibreDWG grava lixo com quebra de linha dentro de textos, e a saída muda a cada execução. O app conserta o desalinhamento apontado pelo erro e relê, em vez de falhar.
 - **Desenho sem imagem**: linhas infinitas (XLINE/RAY), hélices e sólidos 3D não têm imagem 2D; o app explica em vez de estourar.
-- **Sem fontes no servidor**: a DejaVu Sans vai no repositório como reserva, então os textos aparecem mesmo num contêiner sem fontes.
+- **Fontes do desenho**: o DWG pede fontes pelo nome (Arial, na maioria dos projetos). Sem elas o leitor cai numa substituta mais larga, o texto quebra numa linha a mais e as linhas se atropelam. `static/fonts/` traz a mesma coleção de 181 fontes dos apps irmãos, incluindo a Arial, e o app a registra no leitor antes de desenhar.
 - **Concorrência e disco**: no máximo 2 conversões simultâneas e limpeza de pastas temporárias órfãs, como nos apps irmãos.
 - **Desenhos pesados** (dezenas de MB de geometria em blocos dinâmicos) podem levar mais de um minuto para rasterizar a 4000 px.
 

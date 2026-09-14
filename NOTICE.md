@@ -10,7 +10,7 @@ Este projeto redistribui e depende de componentes de terceiros com licenças pr�
 | **ezdxf** | leitura do DXF e desenho | MIT |
 | **PyMuPDF** (MuPDF) | rasterização em PNG | AGPL-3.0 (Artifex). O uso comercial sem disponibilizar o código-fonte exige licença comercial da Artifex |
 | **Streamlit** | interface web | Apache-2.0 |
-| **DejaVu Sans** (`static/fonts/`) | fonte de reserva para os textos do desenho quando o servidor não tem fontes | Bitstream Vera License + domínio público — texto em `static/fonts/LICENSE_DEJAVU` |
+| **Fontes** (`static/fonts/`) | fontes que o leitor usa para desenhar os textos do DWG, já que o servidor não tem nenhuma. Mesma coleção dos apps irmãos do autor: Liberation, DejaVu, Carlito, Noto e fontes de sistema como Arial e Impact | famílias livres sob SIL OFL 1.1, Bitstream Vera e Apache-2.0 (texto da DejaVu em `static/fonts/LICENSE_DEJAVU`); as fontes de sistema entram só para fidelidade de conversão e seguem os termos de seus fabricantes |
 
 Os arquivos DWG em `tests/fixtures/` vêm da suíte de testes do projeto LibreDWG (`test/test-data/`) e são usados apenas para verificação automatizada.
 

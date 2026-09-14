@@ -63,3 +63,6 @@ old.py
 
 # Saída do smoke em Docker
 smoke-output/
+
+# Fixtures com dados pessoais (nomes, endereço): ficam so na maquina
+tests/fixtures/private/
