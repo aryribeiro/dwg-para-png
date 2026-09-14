@@ -360,7 +360,60 @@ def dxf_to_png(dxf_path: Path):
         "layers": len(doc.layers),
         "repairs": repairs,
     }
+    info.update(fonts_report(doc, msp))
     return png, info
+
+
+# ---------------------------------------------------------------------------
+# QUE FONTE FOI USADA DE VERDADE
+# O DWG pede fontes pelo NOME. Se a fonte pedida não existe no servidor, o
+# desenho é redesenhado com outra, de larguras diferentes: o texto quebra
+# onde o AutoCAD não quebra e as linhas se atropelam. Por isso o app diz
+# qual fonte usou, em vez de entregar um "sucesso" mudo.
+# ---------------------------------------------------------------------------
+_INLINE_FONT = re.compile(r"\\f([^|;}\\]+)")
+# Fontes vetoriais clássicas do AutoCAD (.shx): não existem livres, a troca
+# por uma TrueType é o esperado e não vale um aviso.
+_SHX_CLASSICAS = {
+    "txt", "monotxt", "simplex", "complex", "italic", "italicc", "italict",
+    "romans", "romand", "romanc", "romant", "scripts", "scriptc", "greeks",
+    "greekc", "gothice", "gothicg", "gothici", "syastro", "symap", "symath",
+    "symeteo", "symusic", "iso", "isocp", "isocp2", "isocp3", "isoct",
+    "isoct2", "isoct3", "amgdt", "bigfont", "whgtxt", "whgtxt2",
+}
+
+
+def fonts_report(doc, msp):
+    """Devolve {'fonts': [...], 'font_swaps': [('pedida', 'usada'), ...]}."""
+    from ezdxf.fonts import fonts as ezfonts
+
+    pedidas = set()
+    for style in doc.styles:
+        nome = style.dxf.get("font", "") or ""
+        if nome:
+            pedidas.add(nome)
+    for e in msp.query("MTEXT"):
+        pedidas.update(_INLINE_FONT.findall(e.text or ""))
+
+    usadas, trocas = set(), []
+    for pedida in sorted(pedidas):
+        try:
+            if pedida.lower().endswith((".ttf", ".otf", ".ttc", ".shx")):
+                face = ezfonts.get_font_face(pedida)
+            else:
+                face = ezfonts.resolve_font_face(pedida)
+        except Exception:
+            continue
+        usada = face.filename or ""
+        if not usada:
+            continue
+        usadas.add(face.family or usada)
+        stem = Path(pedida).stem.lower()
+        mesma = stem == Path(usada).stem.lower() or stem == (face.family or "").lower()
+        if not mesma and not pedida.lower().endswith(".shx") and stem not in _SHX_CLASSICAS:
+            trocas.append((pedida, face.family or usada))
+    return {"fonts": sorted(usadas), "font_swaps": trocas,
+            "fonts_dir": sum(1 for _ in STATIC_FONTS_DIR.glob("*.ttf")) if STATIC_FONTS_DIR.is_dir() else 0}
 
 
 # ---------------------------------------------------------------------------
@@ -447,7 +500,13 @@ def main():
     st.image(png_bytes, use_column_width=True)
 
     detail = f"AutoCAD {info['dwgversion']} · {info['entities']} elementos · {info['layers']} camadas"
+    if info.get("fonts"):
+        detail += " · fonte: " + ", ".join(info["fonts"])
     st.caption(detail)
+    if info.get("font_swaps"):
+        trocas = "; ".join(f"{a} por {b}" for a, b in info["font_swaps"])
+        st.warning(f"⚠️ Este servidor não tem toda fonte que o desenho pede e trocou {trocas}. "
+                   "Com largura de letra diferente, o texto pode quebrar em outro ponto.")
     if info["unknown_objects"] or info["skipped_classes"]:
         parts = []
         if info["unknown_objects"]:
